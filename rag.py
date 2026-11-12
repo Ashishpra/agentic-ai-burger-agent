@@ -6,7 +6,7 @@ from rank_bm25 import BM25Okapi
 DOCS = {
     "allergen_guide.txt": [
         "The Candy Swirl contains milk, soy and peanuts. It is made on shared equipment with tree nuts.",
-        "The Classic Burger bun contains wheat and sesame. Classic Burger sauce contains egg and soy.",
+        "The Classic Burger bun contains wheat (gluten) and sesame. Classic Burger sauce contains egg and soy.",
         "Fries are cooked in a dedicated fryer using a vegetable oil blend. Fries contain no milk, egg, peanuts or tree nuts.",
         "Coke and other fountain drinks contain no major allergens.",
     ],

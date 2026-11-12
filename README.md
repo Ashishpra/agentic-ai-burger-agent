@@ -102,7 +102,7 @@ python3 day4.py
 
 ## Roadmap
 
-- [ ] Automated eval suite: retrieval hit rate, routing accuracy and consistency, LLM-as-judge faithfulness
+- [x] Automated eval suite: retrieval hit rate, routing accuracy and consistency, LLM-as-judge faithfulness
 - [ ] Train a small intent classifier and compare it with the LLM router on accuracy, latency, and cost
 - [ ] Attribution of agent messages in graph state
 - [ ] Persistent checkpointer (Postgres) and deployment on AWS (Bedrock)
@@ -113,3 +113,15 @@ python3 day4.py
 ## Disclaimer
 
 This is a personal learning project. All menu items, prices, allergen information, and policies are **fictional** and for demonstration only. It is not affiliated with, endorsed by, or connected to any company or its systems, and uses no real company data or APIs.
+
+## Evaluation results
+
+`day5_evals.py` runs 24 automated checks against the real system:
+
+| Layer | Grader | Result |
+|---|---|---|
+| Retrieval (10 questions, incl. paraphrases and unanswerable ones) | Code: expected chunk in top 1 / top 3 | hit@1 10/10, hit@3 10/10 |
+| Routing (10 conversations x 3 runs) | Code: expected route + consistency | 10/10 accurate, 10/10 stable |
+| Info agent behavior (4 questions, 9 checks) | Code checks + LLM-as-judge faithfulness | 9/9 |
+
+The first run scored 6/9 on the info agent. All three failures were **grader bugs**, not agent bugs: the judge returned empty output (no room left after reasoning) and was missing the source file names the agent cited. The eval also caught a retrieval regression caused by renaming menu items. Lesson: evaluate the evaluator before fixing the system.
