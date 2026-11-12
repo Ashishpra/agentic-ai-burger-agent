@@ -103,7 +103,7 @@ python3 day4.py
 ## Roadmap
 
 - [x] Automated eval suite: retrieval hit rate, routing accuracy and consistency, LLM-as-judge faithfulness
-- [ ] Train a small intent classifier and compare it with the LLM router on accuracy, latency, and cost
+- [x] Train a small intent classifier and compare it with the LLM router on accuracy, latency, and cost
 - [ ] Attribution of agent messages in graph state
 - [ ] Persistent checkpointer (Postgres) and deployment on AWS (Bedrock)
 - [ ] Tracing with OpenTelemetry
@@ -125,3 +125,15 @@ This is a personal learning project. All menu items, prices, allergen informatio
 | Info agent behavior (4 questions, 9 checks) | Code checks + LLM-as-judge faithfulness | 9/9 |
 
 The first run scored 6/9 on the info agent. All three failures were **grader bugs**, not agent bugs: the judge returned empty output (no room left after reasoning) and was missing the source file names the agent cited. The eval also caught a retrieval regression caused by renaming menu items. Lesson: evaluate the evaluator before fixing the system.
+
+## Training lab: trained classifier vs LLM router
+
+`train_router.py` trains a logistic regression head (1,155 parameters) on frozen MiniLM embeddings, then compares it with the Haiku router on the same Day 5 eval.
+
+| | Trained classifier | Haiku router |
+|---|---|---|
+| Day 5 router eval | 8/10 | 10/10 |
+| Avg latency | 42 ms | 788 ms |
+| Cost per message | $0 | API tokens |
+
+Findings: 94% on its own held-out split but 80% on the eval (distribution shift); errors came from slang and surface word overlap ("can I get a refund for my last order" routed to order). A confidence cascade sent every message to the LLM because probabilities were uncalibrated. Lowering the threshold after seeing eval results would be data leakage, so the next step is calibration on a separate validation set with more real data.
