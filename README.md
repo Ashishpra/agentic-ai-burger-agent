@@ -151,3 +151,16 @@ Findings: 94% on its own held-out split but 80% on the eval (distribution shift)
 | $0 pricing, guard OFF | Least-privilege `checkout` (no price parameter) + approval gate showing the real price |
 
 Score: 8/8. The first version scored 5/6 because a keyword grader mistook the agent's *warning* about a poisoned document for compliance, which was fixed with an LLM judge.
+
+## Observability and cost: Sonnet vs Haiku
+
+`day6_observe.py` traces every graph node, LLM call and tool call (tokens, latency, cost). Findings: the Haiku router was 1% of cost while running on every turn; the Sonnet order agent was 70%; the fixed system prompt and tool definitions, not history, dominated input tokens in short conversations.
+
+Switching the specialists to Haiku cut cost per conversation from about $0.034 to $0.002 (~94%). The trace also showed a behavior change, which exposed a gap: no evals covered the order agent. `day6_order_evals.py` adds code-graded order evals (cart, tool calls, checkout flag), 3 runs per case:
+
+| Model | Order evals | Avg latency | Eval cost |
+|---|---|---|---|
+| Sonnet 5.5 | 18/18 | 3.7 s | $0.105 |
+| Haiku 5.5 | 18/18 | 1.7 s | $0.006 |
+
+Decision: switch to Haiku, with the eval suite as a release gate and more cases needed before production.
