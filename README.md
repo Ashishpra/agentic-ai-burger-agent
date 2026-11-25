@@ -174,3 +174,11 @@ Findings:
 - **Resources are application-controlled.** The host discovered `menu://items` but never loaded it, so the model rebuilt the menu with many tool calls. Loading the resource into context would be faster and cheaper.
 - **Server state must be durable.** The cart and order counter live in process memory, so every new session restarted at ORD-1001. A production server should keep state in a database.
 - **SDK versions move fast.** MCP SDK 2.x renamed `FastMCP` to `MCPServer` and `inputSchema` to `input_schema`; the version is pinned in `requirements.txt`.
+
+## Chat UI
+
+`chat_app.py` is a local web app (Python standard library only) that hosts the agent: it keeps one MCP session open, shows the live cart and every MCP tool call, and pauses the agent for a **Place order / Cancel** button before checkout. It listens on localhost only and validates input.
+
+![Burger agent chat UI](docs/chat-ui.png)
+
+Run: `python3 chat_app.py`, then open http://localhost:8000
