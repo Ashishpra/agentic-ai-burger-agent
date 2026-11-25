@@ -164,3 +164,13 @@ Switching the specialists to Haiku cut cost per conversation from about $0.034 t
 | Haiku 5.5 | 18/18 | 1.7 s | $0.006 |
 
 Decision: switch to Haiku, with the eval suite as a release gate and more cases needed before production.
+
+## MCP: the burger tools as a Model Context Protocol server
+
+`burger_mcp_server.py` exposes the menu, cart, checkout and RAG search as an MCP server (stdio transport, MCP Python SDK 2.x). `mcp_agent.py` is a host that **discovers its tools at runtime** (`list_tools`, `list_resources`) instead of hard-coding them, and asks a human before `checkout`.
+
+Findings:
+- **Rules that must always hold belong in the server.** Moving the tools out of the agent silently dropped an allergy safety line that lived in the old agent's prompt. Fixed in the server: allergen search results now carry a `safety_note`, so every MCP client gets it. The host's checkout approval is UX; server-side confirmation is the real guarantee, since any client can connect.
+- **Resources are application-controlled.** The host discovered `menu://items` but never loaded it, so the model rebuilt the menu with many tool calls. Loading the resource into context would be faster and cheaper.
+- **Server state must be durable.** The cart and order counter live in process memory, so every new session restarted at ORD-1001. A production server should keep state in a database.
+- **SDK versions move fast.** MCP SDK 2.x renamed `FastMCP` to `MCPServer` and `inputSchema` to `input_schema`; the version is pinned in `requirements.txt`.
